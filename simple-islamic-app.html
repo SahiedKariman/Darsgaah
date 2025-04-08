@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamitische Leerapplicatie</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: #2e7d32;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .progress-container {
+            margin-top: 1rem;
+            background-color: #388e3c;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: white;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        
+        nav.chapter-nav {
+            background-color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav.chapter-nav button {
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        nav.chapter-nav button.active {
+            background-color: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+        
+        nav.chapter-nav button.completed {
+            background-color: #e8f5e9;
+            border-color: #2e7d32;
+            color: #2e7d32;
+        }
+        
+        nav.section-nav {
+            padding: 0.5rem 1rem;
+            background-color: #fafafa;
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section-blocks {
+            display: flex;
+            margin-top: 0.5rem;
+        }
+        
+        .section-block {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            background-color: #e0e0e0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        
+        .section-block.active {
+            background-color: #2e7d32;
+            border-color: #2e7d32;
+        }
+        
+        .section-block.completed {
+            background-color: #a5d6a7;
+            border-color: #2e7d32;
+        }
+        
+        main {
+            padding: 2rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            margin-bottom: 1rem;
+            color: #2e7d32;
+        }
+        
+        h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .paragraph {
+            margin-bottom: 1rem;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.5s, height 0.5s;
+        }
+        
+        .paragraph.visible {
+            opacity: 1;
+            height: auto;
+            overflow: visible;
+        }
+        
+        button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #388e3c;
+        }
+        
+        button:disabled {
+            background-color: #a5a5a5;
+            cursor: not-allowed;
+        }
+        
+        .quiz-options button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background-color: white;
+            color: #333;
+            border: 1px solid #ddd;
+            margin-bottom: 0.5rem;
+            padding: 0.8rem;
+            border-radius: 4px;
+        }
+        
+        .quiz-options button:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .quiz-options button.correct {
+            background-color: #e8f5e9;
+            border-color: #2e7d32;
+        }
+        
+        .quiz-options button.wrong {
+            background-color: #ffebee;
+            border-color: #c62828;
+        }
+        
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        
+        .feedback.correct {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .feedback.wrong {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .hamburger-menu {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 2rem;
+            height: 2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+        
+        .hamburger-menu div {
+            width: 2rem;
+            height: 0.25rem;
+            background-color: white;
+            border-radius: 10px;
+        }
+        
+        .menu {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .hamburger-menu {
+                display: flex;
+            }
+            
+            .menu {
+                display: none;
+                padding: 1rem 0;
+            }
+            
+            .menu.show {
+                display: block;
+            }
+            
+            nav.chapter-nav button {
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Islamitische Leerapplicatie</h1>
+        <button class="hamburger-menu" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </button>
+        <div class="menu" id="menu">
+            <button onclick="alert('Hoofdmenu functionaliteit zal later worden toegevoegd')">Hoofdmenu</button>
+            <button onclick="alert('Cursussen functionaliteit zal later worden toegevoegd')">Cursussen</button>
+            <button onclick="alert('Bronnen functionaliteit zal later worden toegevoegd')">Bronnen</button>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="progress-text" id="progress-text">Voortgang: 0%</div>
+    </header>
+
+    <nav class="chapter-nav" id="chapter-nav">
+        <!-- Hoofdstukken worden hier dynamisch ingevoegd -->
+    </nav>
+
+    <nav class="section-nav">
+        <div>
+            <h3 id="current-chapter-title">Hoofdstuk</h3>
+            <div class="section-blocks" id="section-blocks">
+                <!-- Sectieblokjes worden hier dynamisch ingevoegd -->
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="content-card">
+            <div id="section-content">
+                <!-- Sectie-inhoud wordt hier dynamisch ingevoegd -->
+            </div>
+            
+            <div id="quiz-container" style="display: none;">
+                <!-- Quiz wordt hier dynamisch ingevoegd -->
+            </div>
+            
+            <button id="next-button" onclick="handleNextButtonClick()">Volgende Paragraaf</button>
+        </div>
+    </main>
+
+    <footer>
+        © <span id="current-year"></span> Islamitische Leerapplicatie
+    </footer>
+
+    <script>
+        // Voorbeeld lesmateriaal
+        const courseMaterial = {
+            chapters: [
+                {
+                    id: 1,
+                    title: "Inleiding tot de Islam",
+                    sections: [
+                        {
+                            id: "1-1",
+                            title: "Wat is Islam?",
+                            paragraphs: [
+                                "Islam is een monotheïstische godsdienst die gebaseerd is op de leer dat er slechts één God (Allah) is en dat Mohammed Zijn laatste profeet is.",
+                                "Het woord 'Islam' betekent letterlijk 'overgave' of 'onderwerping' aan de wil van Allah.",
+                                "Islam is een van de grootste wereldgodsdiensten met meer dan 1,8 miljard volgelingen wereldwijd.",
+                                "De heilige tekst van de Islam is de Koran, die volgens de islamitische leer de letterlijke woorden van Allah bevat, zoals geopenbaard aan de profeet Mohammed via de engel Gabriël."
+                            ]
+                        },
+                        {
+                            id: "1-2",
+                            title: "De vijf zuilen",
+                            paragraphs: [
+                                "De Islam is gebouwd op vijf fundamentele zuilen die de basis vormen van de islamitische praktijk.",
+                                "De eerste zuil is de geloofsbelijdenis (Shahada): 'Er is geen god dan Allah, en Mohammed is Zijn boodschapper.'",
+                                "De tweede zuil is het gebed (Salat): Moslims bidden vijf keer per dag op vastgestelde tijden.",
+                                "De derde zuil is het geven van aalmoezen (Zakat): Een verplichte liefdadigheidsbijdrage om de armen te helpen.",
+                                "De vierde zuil is het vasten tijdens Ramadan (Sawm): Gedurende deze heilige maand vasten moslims van zonsopgang tot zonsondergang.",
+                                "De vijfde zuil is de bedevaart naar Mekka (Hajj): Elke moslim die fysiek en financieel in staat is, moet ten minste eenmaal in zijn leven op bedevaart naar Mekka gaan."
+                            ]
+                        }
+                    ],
+                    quiz: {
+                        question: "Wat betekent het woord 'Islam' letterlijk?",
+                        options: [
+                            "Vrede",
+                            "Overgave",
+                            "Gebed",
+                            "Liefde"
+                        ],
+                        correctAnswer: 1,
+                        explanation: "Het woord 'Islam' komt van het Arabische woord 'aslama', wat 'overgave' of 'onderwerping' aan de wil van Allah betekent."
+                    }
+                },
+                {
+                    id: 2,
+                    title: "Antwoorden op Atheïsme",
+                    sections: [
+                        {
+                            id: "2-1",
+                            title: "Existentiële vragen",
+                            paragraphs: [
+                                "De Islam biedt antwoorden op fundamentele existentiële vragen zoals: Waarom bestaan we? Wat is ons doel? Wat gebeurt er na de dood?",
+                                "Deze vragen worden beantwoord vanuit zowel theologisch als filosofisch perspectief binnen de islamitische traditie.",
+                                "In tegenstelling tot het atheïstisch perspectief, stelt de Islam dat het leven een doel heeft dat door Allah is bepaald.",
+                                "De Koran moedigt mensen aan om na te denken over de schepping en de tekenen van Allah in het universum te herkennen."
+                            ]
+                        },
+                        {
+                            id: "2-2",
+                            title: "Morele standaarden",
+                            paragraphs: [
+                                "De Islam stelt dat objectieve morele waarden alleen kunnen bestaan met een goddelijke bron.",
+                                "Zonder God worden morele standaarden subjectief en cultureel relatief volgens de islamitische filosofie.",
+                                "De Koran en de Soennah bieden richtlijnen voor ethisch gedrag dat tijdloos en universeel toepasbaar is.",
+                                "De islamitische ethiek is gebaseerd op concepten als rechtvaardigheid, barmhartigheid, eerlijkheid en respect voor alle schepselen.",
+                                "In het islamitische perspectief komt moraliteit niet voort uit evolutionaire processen of sociale overeenkomsten, maar uit goddelijke wijsheid."
+                            ]
+                        }
+                    ],
+                    quiz: {
+                        question: "Volgens de Islam, waarop zijn objectieve morele waarden gebaseerd?",
+                        options: [
+                            "Culturele tradities",
+                            "Menselijke evolutie",
+                            "Goddelijke openbaring",
+                            "Sociale overeenkomsten"
+                        ],
+                        correctAnswer: 2,
+                        explanation: "De Islam leert dat objectieve morele waarden hun oorsprong hebben in goddelijke openbaring, waardoor ze universeel en tijdloos zijn."
+                    }
+                }
+            ]
+        };
+
+        // State management
+        let currentChapter = 0;
+        let currentSection = 0;
+        let visibleParagraphs = 1;
+        let showingQuiz = false;
+        let selectedAnswer = null;
+        let progress = JSON.parse(localStorage.getItem('islamicAppProgress')) || {
+            chapters: {},
+            sections: {},
+            paragraphs: {}
+        };
+
+        // DOM-elementen
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const chapterNav = document.getElementById('chapter-nav');
+        const sectionBlocks = document.getElementById('section-blocks');
+        const currentChapterTitle = document.getElementById('current-chapter-title');
+        const sectionContent = document.getElementById('section-content');
+        const quizContainer = document.getElementById('quiz-container');
+        const nextButton = document.getElementById('next-button');
+        const currentYearSpan = document.getElementById('current-year');
+        
+        // Stel het huidige jaar in in de footer
+        currentYearSpan.textContent = new Date().getFullYear();
+
+        // Initialisatie
+        function initApp() {
+            renderChapters();
+            renderCurrentSection();
+            updateProgressDisplay();
+        }
+
+        // Toggle menu voor mobiele weergave
+        function toggleMenu() {
+            const menu = document.getElementById('menu');
+            menu.classList.toggle('show');
+        }
+
+        // Render hoofdstukknoppen
+        function renderChapters() {
+            chapterNav.innerHTML = '';
+            
+            courseMaterial.chapters.forEach((chapter, index) => {
+                const button = document.createElement('button');
+                button.textContent = chapter.title;
+                button.onclick = () => navigateToChapter(index);
+                
+                if (index === currentChapter) {
+                    button.classList.add('active');
+                } else if (progress.chapters[chapter.id]) {
+                    button.classList.add('completed');
+                }
+                
+                chapterNav.appendChild(button);
+            });
+        }
+
+        // Render sectieblokjes
+        function renderSectionBlocks() {
+            sectionBlocks.innerHTML = '';
+            const chapter = courseMaterial.chapters[currentChapter];
+            
+            chapter.sections.forEach((section, index) => {
+                const block = document.createElement('div');
+                block.className = 'section-block';
+                block.title = section.title;
+                block.onclick = () => navigateToSection(index);
+                
+                if (index === currentSection) {
+                    block.classList.add('active');
+                } else if (progress.sections[`${chapter.id}-${section.id}`]) {
+                    block.classList.add('completed');
+                }
+                
+                sectionBlocks.appendChild(block);
+            });
+        }
+
+        // Render de huidige sectie-inhoud
+        function renderCurrentSection() {
+            const chapter = courseMaterial.chapters[currentChapter];
+            const section = chapter.sections[currentSection];
+            
+            currentChapterTitle.textContent = chapter.title;
+            renderSectionBlocks();
+            
+            if (showingQuiz) {
+                renderQuiz();
+                return;
+            }
+            
+            quizContainer.style.display = 'none';
+            sectionContent.style.display = 'block';
+            
+            sectionContent.innerHTML = `
+                <h2>${section.title}</h2>
+                ${section.paragraphs.map((paragraph, index) => 
+                    `<p class="paragraph ${index < visibleParagraphs ? 'visible' : ''}">${paragraph}</p>`
+                ).join('')}
+            `;
+            
+            updateButtonState();
+        }
+
+        // Render de quiz voor het huidige hoofdstuk
+        function renderQuiz() {
+            const chapter = courseMaterial.chapters[currentChapter];
+            const quiz = chapter.quiz;
+            
+            sectionContent.style.display = 'none';
+            quizContainer.style.display = 'block';
+            
+            quizContainer.innerHTML = `
+                <h2>Quiz: ${chapter.title}</h2>
+                <p><strong>${quiz.question}</strong></p>
+                <div class="quiz-options">
+                    ${quiz.options.map((option, index) => 
+                        `<button onclick="checkAnswer(${index})" 
+                        class="${selectedAnswer === index 
+                            ? (index === quiz.correctAnswer ? 'correct' : 'wrong') 
+                            : ''}"
+                        ${selectedAnswer !== null ? 'disabled' : ''}>${option}</button>`
+                    ).join('')}
+                </div>
+                ${selectedAnswer !== null ? `
+                <div class="feedback ${selectedAnswer === quiz.correctAnswer ? 'correct' : 'wrong'}">
+                    <p><strong>${selectedAnswer === quiz.correctAnswer ? 'Correct!' : 'Niet correct.'}</strong></p>
+                    <p>${quiz.explanation}</p>
+                </div>
+                ` : ''}
+            `;
+            
+            nextButton.textContent = selectedAnswer !== null 
+                ? (currentChapter < courseMaterial.chapters.length - 1 ? 'Naar volgend hoofdstuk' : 'Terug naar begin') 
+                : 'Selecteer een antwoord';
+            nextButton.disabled = selectedAnswer === null;
+        }
+
+        // Controleer het antwoord op een quizvraag
+        function checkAnswer(index) {
+            selectedAnswer = index;
+            const chapter = courseMaterial.chapters[currentChapter];
+            
+            if (index === chapter.quiz.correctAnswer) {
+                markChapterComplete(chapter.id);
+            }
+            
+            renderQuiz();
+            updateProgressDisplay();
+        }
+
+        // Navigeer naar een specifiek hoofdstuk
+        function navigateToChapter(index) {
+            currentChapter = index;
+            currentSection = 0;
+            visibleParagraphs = 1;
+            showingQuiz = false;
+            selectedAnswer = null;
+            renderCurrentSection();
+            updateProgressDisplay();
+        }
+
+        // Navigeer naar een specifieke sectie
+        function navigateToSection(index) {
+            currentSection = index;
+            visibleParagraphs = 1;
+            showingQuiz = false;
+            renderCurrentSection();
+        }
+
+        // Afhandeling van de "Volgende" knop
+        function handleNextButtonClick() {
+            const chapter = courseMaterial.chapters[currentChapter];
+            const section = chapter.sections[currentSection];
+            
+            if (showingQuiz) {
+                if (selectedAnswer !== null) {
+                    goToNextChapter();
+                }
+                return;
+            }
+            
+            if (visibleParagraphs < section.paragraphs.length) {
+                // Toon volgende paragraaf
+                markParagraphComplete(chapter.id, section.id, visibleParagraphs - 1);
+                visibleParagraphs++;
+                renderCurrentSection();
+            } else {
+                // Ga naar volgende sectie of quiz
+                markSectionComplete(chapter.id, section.id);
+                
+                if (currentSection < chapter.sections.length - 1) {
+                    currentSection++;
+                    visibleParagraphs = 1;
+                    renderCurrentSection();
+                } else {
+                    showingQuiz = true;
+                    renderCurrentSection();
+                }
+            }
+            
+            updateProgressDisplay();
+        }
+
+        // Ga naar het volgende hoofdstuk
+        function goToNextChapter() {
+            if (currentChapter < courseMaterial.chapters.length - 1) {
+                currentChapter++;
+                currentSection = 0;
+                visibleParagraphs = 1;
+                showingQuiz = false;
+                selectedAnswer = null;
+            } else {
+                // Terug naar begin als alle hoofdstukken voltooid zijn
+                currentChapter = 0;
+                currentSection = 0;
+                visibleParagraphs = 1;
+                showingQuiz = false;
+                selectedAnswer = null;
+            }
+            
+            renderCurrentSection();
+            updateProgressDisplay();
+        }
+
+        // Markeer een paragraaf als voltooid
+        function markParagraphComplete(chapterId, sectionId, paragraphIndex) {
+            progress.paragraphs[`${chapterId}-${sectionId}-${paragraphIndex}`] = true;
+            saveProgress();
+        }
+
+        // Markeer een sectie als voltooid
+        function markSectionComplete(chapterId, sectionId) {
+            progress.sections[`${chapterId}-${sectionId}`] = true;
+            saveProgress();
+        }
+
+        // Markeer een hoofdstuk als voltooid
+        function markChapterComplete(chapterId) {
+            progress.chapters[`${chapterId}`] = true;
+            saveProgress();
+        }
+
+        // Sla voortgang op in localStorage
+        function saveProgress() {
+            localStorage.setItem('islamicAppProgress', JSON.stringify(progress));
+        }
+
+        // Update de weergave van de voortgangsbalk
+        function updateProgressDisplay() {
+            const totalChapters = courseMaterial.chapters.length;
+            let completedChapters = 0;
+            
+            courseMaterial.chapters.forEach(chapter => {
+                if (progress.chapters[chapter.id]) {
+                    completedChapters++;
+                }
+            });
+            
+            const percentage = Math.round((completedChapters / totalChapters) * 100);
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `Voortgang: ${completedChapters}/${totalChapters} hoofdstukken (${percentage}%)`;
+        }
+
+        // Update de status van de "Volgende" knop
+        function updateButtonState() {
+            const chapter = courseMaterial.chapters[currentChapter];
+            const section = chapter.sections[currentSection];
+            
+            if (visibleParagraphs < section.paragraphs.length) {
+                nextButton.textContent = 'Volgende Paragraaf';
+            } else {
+                nextButton.textContent = currentSection < chapter.sections.length - 1 ? 'Volgende Sectie' : 'Naar Quiz';
+            }
+        }
+
+        // Start de app
+        initApp();
+    </script>
+</body>
+</html>
